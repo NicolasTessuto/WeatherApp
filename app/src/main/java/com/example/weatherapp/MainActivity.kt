@@ -15,9 +15,15 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -34,21 +40,21 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.layout
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.example.weatherapp.constant.Const.Companion.colorBg1
 import com.example.weatherapp.constant.Const.Companion.colorBg2
 import com.example.weatherapp.constant.Const.Companion.permissions
-import com.example.weatherapp.model.MyLatLng
+import com.example.weatherapp.model.AppLatLong
 import com.example.weatherapp.model.forecast.ForecastResult
 import com.example.weatherapp.model.weather.WeatherResult
 import com.example.weatherapp.viewmodel.MainViewModel
 import com.example.weatherapp.viewmodel.STATE
+import com.example.weatherapp.views.ForecastSection
+import com.example.weatherapp.views.WeatherSection
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -59,20 +65,20 @@ import com.google.android.gms.location.Priority
 import kotlinx.coroutines.coroutineScope
 
 class MainActivity : ComponentActivity() {
-    private lateinit var fusedLocationProvider: FusedLocationProviderClient
+    private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
     private lateinit var mainViewModel: MainViewModel
     private var locationRequired: Boolean = false
 
     override fun onResume() {
         super.onResume()
-        if (locationRequired) startLocationUpdate();
+        if (locationRequired) startLocationUpdate()
     }
 
     override fun onPause() {
         super.onPause()
         locationCallback?.let {
-            fusedLocationProvider?.removeLocationUpdates(it)
+            fusedLocationProviderClient?.removeLocationUpdates(it)
         }
     }
 
@@ -87,7 +93,7 @@ class MainActivity : ComponentActivity() {
                 .setMaxUpdateDelayMillis(100)
                 .build()
 
-            fusedLocationProvider?.requestLocationUpdates(
+            fusedLocationProviderClient?.requestLocationUpdates(
                 locationRequest,
                 it,
                 Looper.getMainLooper()
@@ -95,31 +101,27 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         initLocationClient()
         initViewModel()
 
-
         setContent {
 
             var currentLocation by remember {
-                mutableStateOf(MyLatLng(-21.1785719, -47.829675))
+                mutableStateOf(AppLatLong(0.0, 0.0))
             }
 
             locationCallback = object : LocationCallback() {
                 override fun onLocationResult(p0: LocationResult) {
                     super.onLocationResult(p0)
                     for (location in p0.locations) {
-                        currentLocation = MyLatLng(
+                        currentLocation = AppLatLong(
                             location.latitude,
                             location.longitude
                         )
                     }
-
-
                 }
             }
 
@@ -132,12 +134,19 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun fetchWeatherInformation(mainViewModel: MainViewModel, currentLocation: AppLatLong) {
+        mainViewModel.state = STATE.LOADING
+        mainViewModel.getWeatherByLocation(currentLocation)
+        mainViewModel.getForecastByLocation(currentLocation)
+        mainViewModel.state = STATE.SUCCESS
+    }
+
     private fun initViewModel() {
         mainViewModel = ViewModelProvider(this@MainActivity)[MainViewModel::class.java]
     }
 
     @Composable
-    private fun LocationScreen(context: Context, currentLocation: MyLatLng) {
+    private fun LocationScreen(context: Context, currentLocation: AppLatLong) {
         val launcherMultiplePermissions = rememberLauncherForActivityResult(
             ActivityResultContracts.RequestMultiplePermissions()
         ) { permissionMap ->
@@ -145,8 +154,8 @@ class MainActivity : ComponentActivity() {
                 accepted && next
             }
             if (areGranted) {
-                locationRequired = true;
-                startLocationUpdate();
+                locationRequired = true
+                startLocationUpdate()
                 Toast.makeText(context, "Permission Granted", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(context, "Permission Denied", Toast.LENGTH_SHORT).show()
@@ -175,18 +184,25 @@ class MainActivity : ComponentActivity() {
                 }
             }
         })
+        
+        LaunchedEffect(key1 = true, block = {
+            fetchWeatherInformation(mainViewModel, currentLocation)
+        })
+
         val gradient = Brush.linearGradient(
             colors = listOf(Color(colorBg1), Color(colorBg2)),
             start = Offset(1000f, -1000f),
             end = Offset(1000f, 1000f)
         )
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(gradient)
+                .background(gradient),
+            contentAlignment = Alignment.BottomEnd
         ) {
             val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-            val marginTop = screenHeight * 0.2f
+            val marginTop = screenHeight * 0.1f
             val marginTopPx = with(LocalDensity.current) { marginTop.toPx() }
 
 
@@ -205,66 +221,57 @@ class MainActivity : ComponentActivity() {
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if(mainViewModel.state == STATE.LOADING){
-                    LoadingSection()
-                } else if (mainViewModel.state == STATE.FAILED){
-                    ErrorSection(mainViewModel.errorMessage)
-                } else{
-                    WeatherSection(mainViewModel.weatherResponse)
-                    ForecastSection(mainViewModel.forecastResponse)
+                when (mainViewModel.state) {
+                    STATE.LOADING -> {
+                        LoadingSection()
+                    }
+
+                    STATE.FAILED -> {
+                        ErrorSection(mainViewModel.errorMessage)
+                    }
+
+                    else -> {
+                        WeatherSection(mainViewModel.weatherResponse)
+                        ForecastSection(mainViewModel.forecastResponse)
+                    }
+                }
+
+                FloatingActionButton(
+                    onClick = {
+                        fetchWeatherInformation(mainViewModel, currentLocation)
+                    },
+                    modifier = Modifier.padding(bottom = 16.dp)
+                ) {
+                    Icon(Icons.Default.Refresh, contentDescription = "Buscar dados")
                 }
             }
         }
     }
 
     @Composable
-    fun ForecastSection(forecastResponse: ForecastResult) {
+    fun ErrorSection(errorMessage: String) {
         return Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            Text(text =  forecastResponse.toString())
-        }
-
-    }
-
-    @Composable
-    fun WeatherSection(weatherResponse : WeatherResult) {
-        return Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            Text(text =  weatherResponse.toString())
-        }
-
-    }
-
-    @Composable
-    fun ErrorSection(errorMessage : String) {
-        return Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             Text(text = errorMessage, color = Color.Red)
         }
     }
+
     @Composable
     fun LoadingSection() {
         return Column(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
-        ){
+        ) {
             CircularProgressIndicator(color = Color.White)
         }
     }
 
-
     private fun initLocationClient() {
-        fusedLocationProvider = LocationServices
+        fusedLocationProviderClient = LocationServices
             .getFusedLocationProviderClient(this)
     }
 }

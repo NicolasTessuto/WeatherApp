@@ -1,5 +1,7 @@
 package com.example.weatherapp.model.weather
 
-data class Snow (
-    val d1h: Double? = null
+import com.google.gson.annotations.SerializedName
+
+data class Snow(
+    @SerializedName("d1h") val d1h: Double? = null
 )

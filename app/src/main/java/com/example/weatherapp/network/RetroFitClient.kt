@@ -5,9 +5,9 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class RetroFitClient {
     companion object {
-        private var apiService:IApiService? = null
-        fun getInstance(): IApiService{
-            if(apiService==null){
+        private var apiService: IApiService? = null
+        fun getInstance(): IApiService {
+            if (apiService == null) {
                 apiService = Retrofit.Builder()
                     .baseUrl("https://api.openweathermap.org/data/2.5/")
                     .addConverterFactory(GsonConverterFactory.create())

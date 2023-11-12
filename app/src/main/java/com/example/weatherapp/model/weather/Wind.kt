@@ -2,12 +2,8 @@ package com.example.weatherapp.model.weather
 
 import com.google.gson.annotations.SerializedName
 
-data class Wind (
-    @SerializedName("coord") var coord:Coord? = Coord(),
-    @SerializedName("weather") var weather:ArrayList<Weather>? = arrayListOf(),
-    @SerializedName("base") var base:String? = null,
-    @SerializedName("main") var main:Main? = Main(),
-    @SerializedName("visibility") var visibility:Int? = null,
-    @SerializedName("wind") var wind:Wind? = Wind(),
-    @SerializedName("clouds") var clouds:Clouds? = Clouds(),
+data class Wind(
+    @SerializedName("speed") var speed: Double? = null,
+    @SerializedName("deg") var deg: Double? = null,
+    @SerializedName("gust") var gust: Double? = null
 )

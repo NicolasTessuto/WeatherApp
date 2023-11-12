@@ -67,14 +67,20 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
 
+    // location
     implementation("com.google.android.gms:play-services-location:21.0.1")
 
+    // convert api
     implementation("com.google.code.gson:gson:2.10.1")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.okhttp3:okhttp:5.0.0-alpha.2")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+    // load network image
     implementation("io.coil-kt:coil-compose:2.4.0")
+    // font
     implementation("com.github.Gurupreet:FontAwesomeCompose:1.0.0")
+    // full layout
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.33.1-alpha")
 
 
