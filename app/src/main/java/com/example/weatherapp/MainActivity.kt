@@ -179,6 +179,7 @@ class MainActivity : ComponentActivity() {
                         ) == PackageManager.PERMISSION_GRANTED
                     }) {
                     startLocationUpdate()
+                    fetchWeatherInformation(mainViewModel, currentLocation)
                 } else {
                     launcherMultiplePermissions.launch(permissions)
                 }
@@ -187,6 +188,7 @@ class MainActivity : ComponentActivity() {
         
         LaunchedEffect(key1 = true, block = {
             fetchWeatherInformation(mainViewModel, currentLocation)
+
         })
 
         val gradient = Brush.linearGradient(
