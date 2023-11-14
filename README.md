@@ -16,7 +16,8 @@ Também é possível visualizar uma previsão do tempo da localização atual do
 
 Basta clonar o repositório, abri-lo utilizando o Android Studio e dar build no projeto.
 
-*Vale ressaltar que além de testarmos utilizando o emulador, os testes em um dispositivo real foram feitos utilizando um aparelho Samsung
+* Vale ressaltar que além de testarmos utilizando o emulador, os testes em um dispositivo real foram feitos utilizando um aparelho Samsung
+ O repositório já possui uma chave de API na classe [Const.kt](https://github.com/NicolasTessuto/WeatherApp/blob/master/app/src/main/java/com/example/weatherapp/constant/Const.kt), porém se a mesma não funcionar, basta criar uma nova em: https://openweathermap.org/api
 
 - Versão do kotlin compiler: 1.8.10
 - Language version: 1.9
