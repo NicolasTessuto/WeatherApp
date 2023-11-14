@@ -26,4 +26,4 @@ Basta clonar o repositório e abri-lo utilizando o Android Studio.
 ### Autores
 - Nícolas dos Santos (código: )
 - Victor Betini (código: 1920580)
-- Victor Angelotti (código: )
+- Victor Angelotti (código: 1976696)
