@@ -14,7 +14,9 @@ Também é possível visualizar uma previsão do tempo da localização atual do
 
 ## Como executar
 
-Basta clonar o repositório e abri-lo utilizando o Android Studio.
+Basta clonar o repositório, abri-lo utilizando o Android Studio e dar build no projeto.
+
+*Vale ressaltar que além de testarmos utilizando o emulador, os testes em um dispositivo real foram feitos utilizando um aparelho Samsung
 
 - Versão do kotlin compiler: 1.8.10
 - Language version: 1.9
