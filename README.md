@@ -24,6 +24,6 @@ Basta clonar o repositório e abri-lo utilizando o Android Studio.
 #### Obs.: Ao rodar o aplicativo em um emulador, a localização enviada para o OpenWeather API não estará correta
 
 ### Autores
-- Nícolas dos Santos (código: )
+- Nícolas dos Santos (código: 1994113)
 - Victor Betini (código: 1920580)
 - Victor Angelotti (código: 1976696)
